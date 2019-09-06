@@ -55,16 +55,66 @@ class RandomWordsState extends State<RandomWords> {
   }
 
   Widget _buildRow(WordPair pair) {
+    final bool alreadySaved = _saved.contains(pair);
+
     return ListTile(
       title: Text(
         pair.asPascalCase,
         style: _biggerFont,
       ),
+      trailing: Icon(
+        alreadySaved ? Icons.favorite : Icons.favorite_border,
+        color: alreadySaved ? Colors.redAccent : Colors.grey,
+      ),
+      onTap: () {
+        setState(() {
+          if (alreadySaved) {
+            _saved.remove(pair);
+          } else {
+            _saved.add(pair);
+          }
+        });
+      },
     );
   }
 
   void _pushSaved() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          final Iterable<ListTile> savedList = _saved.map(
+              (WordPair pair) {
+                return ListTile(
+                  title: Text(
+                    pair.asPascalCase,
+                    style: _biggerFont,
+                  ),
+                  trailing: Icon(
+                    Icons.delete,
+                    color: Colors.grey,
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _saved.remove(pair);
+                    });
+                  },
+                );
+              },
+          );
+          final List<Widget> divide = ListTile.divideTiles(
+            context: context,
+            tiles: savedList,
+          ).toList();
 
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Names Saved'),
+            ),
+            body: ListView(children: divide),
+          );
+        },
+      ),
+    );
   }
 }
 
